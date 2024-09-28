@@ -36,6 +36,14 @@ void workerThreadStart(WorkerArgs * const args) {
     // half of the image and thread 1 could compute the bottom half.
 
     printf("Hello world from thread %d\n", args->threadId);
+    // int startRow = args->height* (args->threadId / args->numThreads);
+    // int endRow = args->height* ((args->threadId+1) / args->numThreads);
+    int startRow = args->height/args->numThreads * args->threadId;
+    int endRow = args->height/ args->numThreads * (args->threadId+1);
+    int numRows = endRow - startRow;
+    // printf("ThreadID: %d, startRow, %d, endRow, %d, numRows, %d", args->threadId, startRow, endRow, numRows);
+    mandelbrotSerial(args->x0, args->y0, args->x1, args->y1,
+    args->width, args->height, startRow, numRows, args->maxIterations, args->output);
 }
 
 //
@@ -60,6 +68,7 @@ void mandelbrotThread(
     // Creates thread objects that do not yet represent a thread.
     std::thread workers[MAX_THREADS];
     WorkerArgs args[MAX_THREADS];
+    // we should do a heigh left for the last one to pick up all the remaining ones
 
     for (int i=0; i<numThreads; i++) {
       
@@ -68,15 +77,20 @@ void mandelbrotThread(
         // same arguments for each thread
         args[i].x0 = x0;
         args[i].y0 = y0;
+        // args[i].y0 = y0;
         args[i].x1 = x1;
+        // args[i].y1 = y0 + (y1-y0)/(numThreads)*(i+1);
         args[i].y1 = y1;
-        args[i].width = width;
+        args[i].width = width; // give each thread a strip of the image
         args[i].height = height;
+        // args[i].height = height/numThreads; // gets truncated what if this isn't split perfectly
         args[i].maxIterations = maxIterations;
         args[i].numThreads = numThreads;
         args[i].output = output;
-      
         args[i].threadId = i;
+        // startRow = 0
+        // numRows = height
+        // int startRow = args[i].threadId * height/args[i].numThreads
     }
 
     // Spawn the worker threads.  Note that only numThreads-1 std::threads

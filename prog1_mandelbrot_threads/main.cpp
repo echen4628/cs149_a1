@@ -19,7 +19,7 @@ extern void mandelbrotThread(
     int output[]);
 
 extern void writePPMImage(
-    int* data,
+    int* data, // prob a matrix
     int width, int height,
     const char *filename,
     int maxIterations);
@@ -119,7 +119,7 @@ int main(int argc, char** argv) {
     // end parsing of commandline options
 
 
-    int* output_serial = new int[width*height];
+    int* output_serial = new int[width*height]; // does this default to 0, no but memset later
     int* output_thread = new int[width*height];
     
     //
