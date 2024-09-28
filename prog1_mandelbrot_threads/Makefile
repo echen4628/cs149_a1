@@ -11,7 +11,7 @@ PPM_OBJ=$(addprefix $(OBJDIR)/, $(subst $(COMMONDIR)/,, $(PPM_CXX:.cpp=.o)))
 
 THREADS=2 3 4 5 6 7 8
 VIEW=2
-OUTPUT_FILE=problem1_view_$(VIEW).txt
+OUTPUT_FILE=problem1_part_4_view_$(VIEW).txt
 
 default: $(APP_NAME)
 

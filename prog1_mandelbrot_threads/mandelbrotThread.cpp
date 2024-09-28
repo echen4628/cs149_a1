@@ -34,37 +34,17 @@ void workerThreadStart(WorkerArgs * const args) {
     // to compute a part of the output image.  For example, in a
     // program that uses two threads, thread 0 could compute the top
     // half of the image and thread 1 could compute the bottom half.
+
     double startTime = CycleTimer::currentSeconds();
-    // printf("Hello world from thread %d\n", args->threadId);
-    int startRow1 = args->height/4.f * ((float) args->threadId / args->numThreads);
-    int endRow1 = args->height/4.f * ((float) (args->threadId+1) /  args->numThreads);
-    int numRows1 = endRow1 - startRow1;
-    // printf("ThreadID: %d, startRow1: %d, endRow1: %d, numRows1: %d \n", args->threadId, startRow1, endRow1, numRows1);
-    mandelbrotSerial(args->x0, args->y0, args->x1, args->y1,
-    args->width, args->height, startRow1, numRows1, args->maxIterations, args->output);
-
-    int startRow2 = args->height/4.f + (args->height/4.f * ((float) args->threadId / args->numThreads));
-    int endRow2 = args->height/4.f + (args->height/4.f * ((float) (args->threadId+1) /  args->numThreads));
-    int numRows2 = endRow2 - startRow2;
-    // printf("ThreadID: %d, startRow2: %d, endRow2: %d, numRows2: %d \n", args->threadId, startRow2, endRow2, numRows2);
-    mandelbrotSerial(args->x0, args->y0, args->x1, args->y1,
-    args->width, args->height, startRow2, numRows2, args->maxIterations, args->output);
-
-    int startRow3 = args->height/2.f + (args->height/4.f * ((float) args->threadId / args->numThreads));
-    int endRow3 = args->height/2.f + (args->height/4.f * ((float) (args->threadId+1) /  args->numThreads));
-    int numRows3 = endRow3 - startRow3;
-    // printf("ThreadID: %d, startRow2: %d, endRow2: %d, numRows2: %d \n", args->threadId, startRow2, endRow2, numRows2);
-    mandelbrotSerial(args->x0, args->y0, args->x1, args->y1,
-    args->width, args->height, startRow3, numRows3, args->maxIterations, args->output);
-
-
-    int startRow4 = 3*args->height/4.f + (args->height/4.f * ((float) args->threadId / args->numThreads));
-    int endRow4 = 3*args->height/4.f + (args->height/4.f * ((float) (args->threadId+1) /  args->numThreads));
-    int numRows4 = endRow4 - startRow4;
-    // printf("ThreadID: %d, startRow2: %d, endRow2: %d, numRows2: %d \n", args->threadId, startRow2, endRow2, numRows2);
-    mandelbrotSerial(args->x0, args->y0, args->x1, args->y1,
-    args->width, args->height, startRow4, numRows4, args->maxIterations, args->output);
-
+    int num_splits = 25;
+    for (int split=0; split < num_splits; split++) {
+        int startRow = (float) split * args->height/num_splits + ((float) args->height/num_splits * ((float) args->threadId / args->numThreads));
+        int endRow = (float) split * args->height/num_splits + ((float) args->height/num_splits * ((float) (args->threadId+1) / args->numThreads));
+        int numRows = endRow - startRow;
+        // printf("ThreadID: %d, startRow1: %d, endRow1: %d, numRows1: %d \n", args->threadId, startRow1, endRow1, numRows1);
+        mandelbrotSerial(args->x0, args->y0, args->x1, args->y1,
+        args->width, args->height, startRow, numRows, args->maxIterations, args->output);
+    }
 
     double endTime = CycleTimer::currentSeconds();
     printf("[Thread %d]:\t\t[%.3f] ms\n", args->threadId, endTime-startTime);
