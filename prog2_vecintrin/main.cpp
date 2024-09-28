@@ -63,8 +63,8 @@ int main(int argc, char * argv[]) {
   clampedExpSerial(values, exponents, gold, N);
   clampedExpVector(values, exponents, output, N);
 
-  //absSerial(values, gold, N);
-  //absVector(values, output, N);
+  // absSerial(values, gold, N);
+  // absVector(values, output, N);
 
   printf("\e[1;31mCLAMPED EXPONENT\e[0m (required) \n");
   bool clampedCorrect = verifyResult(values, exponents, output, gold, N);
@@ -189,12 +189,16 @@ void absVector(float* values, float* output, int N) {
   for (int i=0; i<N; i+=VECTOR_WIDTH) {
 
     // All ones
-    maskAll = _cs149_init_ones();
-
+    if (i+VECTOR_WIDTH >= N) {
+      maskAll = _cs149_init_ones(N-i);
+    }
+    else{
+      maskAll = _cs149_init_ones();
+    }
     // All zeros
     maskIsNegative = _cs149_init_ones(0);
 
-    // Load vector of values from contiguous memory addresses
+    // Load vector of values from contiguous memory addresses, maskALL is prob wrong?
     _cs149_vload_float(x, values+i, maskAll);               // x = values[i];
 
     // Set mask according to predicate
@@ -249,6 +253,69 @@ void clampedExpVector(float* values, int* exponents, float* output, int N) {
   // Your solution should work for any value of
   // N and VECTOR_WIDTH, not just when VECTOR_WIDTH divides N
   //
+
+  __cs149_vec_float x;
+  __cs149_vec_int y;
+  __cs149_vec_float result;
+  __cs149_vec_int zero = _cs149_vset_int(0);
+  __cs149_vec_int one = _cs149_vset_int(1);
+  __cs149_vec_float max = _cs149_vset_float(9.999999f);
+  __cs149_mask maskAll, maskIsZero, maskPosCount, maskOverMax;
+
+for (int i=0; i<N; i+=VECTOR_WIDTH) {
+
+    // All ones
+    if (i+VECTOR_WIDTH >= N) {
+      maskAll = _cs149_init_ones(N-i);
+    }
+    else{
+      maskAll = _cs149_init_ones();
+    }
+    
+    maskIsZero = _cs149_init_ones(0);
+    maskOverMax = _cs149_init_ones(0);
+
+    // Load vector of values from contiguous memory addresses, maskALL is prob wrong?
+    _cs149_vload_float(x, values+i, maskAll);               // x = values[i];
+    _cs149_vload_int(y, exponents+i, maskAll);            // y = exponents[i];
+
+    _cs149_veq_int(maskIsZero, y, zero, maskAll);         // all the exponents that are 0
+    _cs149_vset_float(result, 1, maskIsZero);               // set the ones
+
+    _cs149_vgt_int(maskPosCount, y, zero, maskAll);
+    _cs149_vmove_float(result, x, maskPosCount);
+    _cs149_vsub_int(y, y, one, maskPosCount);
+    _cs149_vgt_int(maskPosCount, y, zero, maskAll);
+    
+    while (_cs149_cntbits(maskPosCount) > 0) {
+      _cs149_vmult_float(result, result, x, maskPosCount);
+
+      _cs149_vgt_float(maskOverMax, result, max, maskAll);
+      _cs149_vset_float(result, 9.999999f, maskOverMax);
+
+      _cs149_vsub_int(y, y, one, maskPosCount);
+      _cs149_vgt_int(maskPosCount, y, zero, maskAll);
+    }
+    // // check how many counts are less than 0,
+
+    // // 
+    
+    // // // Set mask according to predicate
+    // // _cs149_vlt_float(maskIsNegative, x, zero, maskAll);     // if (x < 0) {
+
+    // // Execute instruction using mask ("if" clause)
+    // _cs149_vsub_float(result, zero, x, maskIsNegative);      //   output[i] = -x;
+
+    // // Inverse maskIsNegative to generate "else" mask
+    // maskIsNotNegative = _cs149_mask_not(maskIsNegative);     // } else {
+
+    // // Execute instruction ("else" clause)
+    // _cs149_vload_float(result, values+i, maskIsNotNegative); //   output[i] = x; }
+
+    // Write results back to memory
+    _cs149_vstore_float(output+i, result, maskAll);
+  }
+
   
 }
 
