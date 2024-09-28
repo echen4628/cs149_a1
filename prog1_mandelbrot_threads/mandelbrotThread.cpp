@@ -38,10 +38,10 @@ void workerThreadStart(WorkerArgs * const args) {
     printf("Hello world from thread %d\n", args->threadId);
     // int startRow = args->height* (args->threadId / args->numThreads);
     // int endRow = args->height* ((args->threadId+1) / args->numThreads);
-    int startRow = args->height/args->numThreads * args->threadId;
-    int endRow = args->height/ args->numThreads * (args->threadId+1);
+    int startRow = args->height * ((float) args->threadId / args->numThreads);
+    int endRow = args->height * ((float) (args->threadId+1) /  args->numThreads);
     int numRows = endRow - startRow;
-    // printf("ThreadID: %d, startRow, %d, endRow, %d, numRows, %d", args->threadId, startRow, endRow, numRows);
+    printf("ThreadID: %d, startRow: %d, endRow: %d, numRows: %d \n", args->threadId, startRow, endRow, numRows);
     mandelbrotSerial(args->x0, args->y0, args->x1, args->y1,
     args->width, args->height, startRow, numRows, args->maxIterations, args->output);
 }
