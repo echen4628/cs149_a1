@@ -13,6 +13,8 @@ TASKSYS_CXX=$(COMMONDIR)/tasksys.cpp
 TASKSYS_LIB=-lpthread
 TASKSYS_OBJ=$(addprefix $(OBJDIR)/, $(subst $(COMMONDIR)/,, $(TASKSYS_CXX:.cpp=.o)))
 
+OUTPUT_FILE=problem6.txt
+
 default: $(APP_NAME)
 
 .PHONY: dirs clean
@@ -35,3 +37,8 @@ $(OBJDIR)/%.o: $(COMMONDIR)/%.cpp
 	$(CXX) $< $(CXXFLAGS) -c -o $@
 
 $(OBJDIR)/main.o: $(COMMONDIR)/CycleTimer.h
+
+profile: $(APP_NAME)
+	@echo "Running kmeans..." > $(OUTPUT_FILE)
+	./$(APP_NAME) >> $(OUTPUT_FILE)
+	@echo "All results saved to $(OUTPUT_FILE)"
