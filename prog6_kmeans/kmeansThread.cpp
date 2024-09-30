@@ -129,6 +129,7 @@ void computeCentroids(WorkerArgs *const args) {
       args->clusterCentroids[k * args->N + n] /= counts[k];
     }
   }
+  printf("before free\n");
 
   free(counts);
   printf("Out computeCentroids\n");
@@ -193,7 +194,7 @@ void kMeansThread(double *data, double *clusterCentroids, int *clusterAssignment
 
   std::thread workers[MAX_THREADS];
   WorkerArgs argArray[MAX_THREADS];
-  int numThreads = 8;
+  int numThreads = 2;
 
   // The WorkerArgs array is used to pass inputs to and return output from
   // functions.
