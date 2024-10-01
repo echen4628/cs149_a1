@@ -89,6 +89,7 @@ void computeAssignments(WorkerArgs *const args) {
  * each cluster.
  */
 void computeCentroids(WorkerArgs *const args) {
+  double startTime = CycleTimer::currentSeconds();
   int *counts = new int[args->K];
 
   // Zero things out
@@ -119,12 +120,15 @@ void computeCentroids(WorkerArgs *const args) {
   }
 
   free(counts);
+  double endTime = CycleTimer::currentSeconds();
+  printf("[computeCentroids]: %.3f ms\n", endTime-startTime);
 }
 
 /**
  * Computes the per-cluster cost. Used to check if the algorithm has converged.
  */
 void computeCost(WorkerArgs *const args) {
+  double startTime = CycleTimer::currentSeconds();
   double *accum = new double[args->K];
 
   // Zero things out
@@ -145,6 +149,8 @@ void computeCost(WorkerArgs *const args) {
   }
 
   free(accum);
+  double endTime = CycleTimer::currentSeconds();
+  printf("[computeCost]: %.03f ms\n", endTime-startTime);
 }
 
 /**
@@ -169,6 +175,14 @@ void computeCost(WorkerArgs *const args) {
  */
 void kMeansThread(double *data, double *clusterCentroids, int *clusterAssignments,
                int M, int N, int K, double epsilon) {
+  double startTime = CycleTimer::currentSeconds();
+
+  static constexpr int MAX_THREADS = 32;
+  
+  // Creates thread objects that do not yet represent a thread.
+  std::thread workers[MAX_THREADS];
+  WorkerArgs args[MAX_THREADS];
+  int numThreads = 4;
 
   // Used to track convergence
   double *prevCost = new double[K];
@@ -228,4 +242,7 @@ void kMeansThread(double *data, double *clusterCentroids, int *clusterAssignment
 
   free(currCost);
   free(prevCost);
+
+  double endTime = CycleTimer::currentSeconds();
+  printf("[kMeansThread]: %.3f ms\n", (endTime - startTime)*1000);
 }
